@@ -1,0 +1,41 @@
+---
+layout: default
+---
+<article class="post">
+  <script src="/remark.min.js"></script>
+  <script src="/jquery.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      var markdown = "{{page.source | escape_javascript }}";
+      var backup = $('<div/>');
+      var is_showing = false;
+
+      $('button.slideshow').click(function() {
+        console.log(arguments);
+        $('body').contents().appendTo(backup);
+        var slideshow = remark.create({
+          source: markdown
+        });
+        is_showing = true;
+      });
+
+      $(document).keyup(function(e){
+        if(e.which == 27 && is_showing) {
+          var body = $('body');
+          body.html('');
+          body.removeClass('remark-container');
+          backup.contents().appendTo(body);
+          is_showing = false;
+        }
+      });
+    });
+  </script>
+
+  <header class="post-header">
+    <h1 class="post-title">{{ page.title }}</h1>
+  </header>
+
+  <div class="post-content">
+    {{ content }}
+    <button class="slideshow">Start Presentation</button>
+</article>

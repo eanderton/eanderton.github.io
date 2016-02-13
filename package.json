@@ -1,0 +1,23 @@
+{
+  "name": "eanderton.github.io",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eanderton/eanderton.github.io.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eanderton/eanderton.github.io/issues"
+  },
+  "homepage": "https://github.com/eanderton/eanderton.github.io#readme",
+  "devDependencies": {
+    "jquery": "^2.2.0",
+    "remark": "^4.1.1",
+  }
+}
