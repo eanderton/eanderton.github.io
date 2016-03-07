@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>A Guide to Make</title>
+  <meta name="description" content="Eric Anderton - (c) 2016 - Version 1.0">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://eanderton.github.io/training/a-guide-to-make/">
+  <link rel="alternate" type="application/rss+xml" title="Phase Positive" href="http://eanderton.github.io/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Phase Positive</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/training/">Training</a>
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post">
+  <script src="/remark.min.js"></script>
+  <script src="/jquery.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      var markdown = "\n# A Guide to Make\n\nEric Anderton - (c) 2016 - Version 1.0\n\nPresented using Reveal.js.\n\nPress `SHIFT+P` to toggle presenter mode. Press `ESC`, or refresh your browser \nat any time to return to the cover page.\n\nNote: *if you are viewing this deck alone, Presenter Mode is recommended\nas not all the content is presented in the slides.*\n\n---\n# Outline\n\n* Background\n* Make BASHing\n* Design\n* Syntax\n* Basic Example\n* Variables\n* Generic Targets\n* Text Replacement\n* Functions\n* Extras\n* Further Examples\n\n---\n# Background\n \n* By Stuart Feldman in April 1976 at Bell Labs\n* Ported to just about every platform imaginable, with many variants\n* Many derivatives exist; most operating systems have one\n* Abstracts dependency management from build steps\n\n???\nAt first blush, 40 years seems like an eternity for a piece of software, \nyet both C and Unix are just as old.  All three enjoy daily use in some\nshape or form even today.  Perhaps computing hasn\'t changed all *that*\nmuch in half a century?\n\nMake has its roots in C/C++ development, and is ideal for building large\ncompiled projects as we\'ll see in later slides.\n\nLike any tool that tries to solve a particular problem, Make isn\'t a\none-size-fits-all proposition.  We see evidence of this by the presence\nof tools like NMake, GNUMake, CMake, SCons, Ant, Paver, Grunt, Gulp, etc.\n\nMake does, however, fit a large number of general cases that are usually\nenough for most any project.  The core of Make, dependency management,\nis just that: the very core of efficiently building just about anything.\n\n---\n# Make BASHing\n\n* Depends on shell execution environment, which is usually BASH\n* Can cause barriers to portability\n* Oddball syntax quirks\n* Is myopic; likes to focus on current directory\n* Recursive Make is not fun\n* Explicit, not implicit\n\n???\nDespite the fact that Make has been ported just about everywhere, it \ndoes not bring a shell environment along for the ride.  For better or\nworse, Make will rely on your native shell environment, whatever\nit may be.  For the most part, this isn\'t a problem for OSX and Linux,\nbut is a huge hurdle for Windows.\n\nMake is actually shell agnostic, but you\'ll almost never see a Makefile\nthat doesn\'t rely on BASH.  At the same time, BASH also isn\'t \neveryone\'s favorite shell to code in.  It has an enormous amount of \nmomentum by being the default on BSD/OSX/Linux, so it\'s more or less \nassumed to be the most reliable target.\n\nAs we\'ll see on later slides, Make\'s syntax is minimal, relies heavily\non Perl-like symbols for special substitutions, and absolutely needs\nreal TAB characters to distinguish targets from commands.\n\nMake grew up in a world where filesystems were shallow and small.  A\nproperly groomed Makefile explicitly calls out all file dependencies,\nwhich can be a challenge for big codebases and deep trees.  Also, \nthe various macros provided for wrangling file paths/names don\'t work\nvery well with arbitrarily deep trees.\n\n---\n# Design\n\n* Built around *file* dependency graph\n* Everything goes in the Makefile\n* Makefile has one or more targets\n* Targets have dependencies and commands used to satisfy\n* Targets are unsatisfied if older than dependencies, or do not exist\n* Is done when all specified targets are satisfied\n* Will grind to a halt if something fails (returns non-zero)\n\n\n???\nIf you\'ve developed any piece of software lately, you\'ve probably run\ninto a Makefile or two.  The structure can be a little strange at first\nbut it\'s not hard to grasp.\n\nThe Makefile is made up of one or more targets, what files that target \ndepends on, and what shell commands should be executed to satisfy the \nproduction. These usually read like rules \n\nMuch of Make\'s odd syntax comes from providing shortcuts, variables, and\nmacros to make authoring of these targets easier, by eliminating\nrepetition.  In some cases, its possible to create general purpose\ntargets that can be entirely data-driven.\n\nMake is run by specifying a target, usually a \'phony\' target that\ndoesn\'t map to a file.  That target in turn relies on other files\nthat must be satisfied by Make.  This triggers all the dependency\nrules and commands needed to satisfy the graph.\n\nThe way Make satisfies targets allows Make to only run the commands\nthat absolutely must be run.  A properly configured Makefile will\nnot do more work than is needed, saving the developer valuable time.\n\n---\n# Makefile Syntax\n\nThe core syntax of a Makefile is the following:\n```\ntarget: dependencies\n[TAB] shell command\n```\n\n???\nHere, `target` is a filename to be satisfied by Make. \n\n`target` is said to be *satisfied* by one or more `dependencies`.\nThese are other file names, which may be in and of themselves,\nother targets.\n\nThe `[TAB]` prefixed `shell command`, is what Make will run if\n`target` doesn\'t exist, or if `target` is *older* than any files\nin `dependencies`.\n\nVi/Vim users will want to add `autocmd filetype make setlocal noexpandtab`\nto their .rc files to avoid potential issues.  Other editors, \nlike PyCharm might require more advanced tweaking to avoid tab\nexpansion.\n\nSo, if a programmer updates a source file, or deletes the target, \nMake will spring into action to run the needed commands to \nre-create `target`. \n\nMake brings much more to the table, which will be covered in later\nslides.\n\n---\n# Basic Example\n\n```\n# basic makefile\n\nmyfile.txt: myfile.src\n  cp myfile.src myfile.txt\n\nall: myfile.txt\n\nclean:\n  -rm myfile.txt\n\n.PHONY: clean, all\n```\nLines prefixed with a `#` are comments and are ignored by Make\n\nWhen `make myfile.txt` is run, Make executes the `cp` command above to \nsatisfy the target.  Running `make all` has the same effect.\n\n???\nIn this simple example, we have a Makefile that has three targets: \none for a text file called `myfile.txt`, a target called `all`, \nand a target called `clean`..\n\nRunning `make myfile.txt` will generate the file if, and only if, it\ndoesn\'t already exist.\n\nRunning `make all` will also trigger the `myfile.txt` target, since\nit depends on that file.\n\nThe `clean` target is special.  It has no dependencies, and will\nremove `myfile.txt`, as the name suggests.  The dash at the start\nof the line tells Make to ignore the return code - Make won\'t exit\nprematurely if the `rm` command fails.\n\nThe `.PHONY` target at the bottom is a special kind of target that \nMake treats differently than other targets.\n\n`.PHONY` tells make that `all` and `clean` aren\'t\nreal files, and that it should ignore those files if they happen to \nexist in the current directory.\n\n`.PHONY` effectively lets us configure Make to have arbitrary\n(and convienent) targets, instead of having to specify files to be \nbuilt.  As a convention, most Makefiles have `all` and `clean` targets.\n\n\n---\n# Basic Example Output\n```\nmake myfile.txt\n$ make myfile.txt\ncp myfile.src myfile.txt\n\n$ make myfile.txt\nmake: `myfile.txt\' is up to date.\n\n$ make clean\nrm myfile.txt\n\n$ make all\ncp myfile.src myfile.txt\n\n$ make all\nmake: Nothing to be done for `all\'.\n```\n???\n\nNote that Make refuses to repeat work that is already done.\n\nIt\'s this economy that is Make\'s chief strength.  A properly coded \nMakefile will allow the tool to always arrive at the fastest\npossible way to satisfy any given dependency graph.\n\nObviously, this approach doesn\'t scale very well.  Make has more\ntricks up its sleeve to help us write a more compact and \nmaintainable Makefile...\n\n---\n# Variables\n\nMake lets us define variables, just like any other programming\nlanguage.\n\n```\nCC := g++\nCC_FLAGS ?= -w\nSOURCES = main.cpp mylib.cpp\nSOURCES += myotherlib.cpp\nSOURCES := yetanotherlib.cpp $(SOURCES)\n\nsometarget:\n  echo $(SOURCES)\n  echo \'$$0.02: Make can be fun.\'\n```\n\n* `=` Lazy Assignment - permits recursive expansion on evaluation\n* `:=` Immediate - evaulated at declaration time$\n* `?=` Set if absent - only set if the variable doesn\'t already have a value\n* `+=` Appends value to variable; lazy-assigns if not set\n* `$(...)` Variable interpolation; substitues variable contents at location\n* `$$` Substitutes a single \'$\'\n\n???\nVariables are essential to readable and useful Makefiles.  Like any \nother form of encapsulation, it does make the file a little harder to\nread, but the resulting file can be shorter and more generic as\na result.\n\nIt\'s generally a good idea to prefer `:=` unless your variable absolutely\nmust be evaluated when it is used.\n\n---\n# Automatic Variables\n\nhttps://www.gnu.org/software/make/manual/html_node/Automatic-Variables.html\n\nWithin a target, Make provides us with some special substitutions that\nallow for much more concise commands:\n\n```\nmyfile.txt: myfile.src\n  cp $^ $@ \n```\n\nThe most common automatic variables are:\n\n* `$@` The target name\n* `$^` All the prerequisites \n* `$<` The first prerequisite\n* `$?` All prerequisites newer than target\n\nAutomatic variables like `$%`, `$+`, `$|`, and `$*` are far less common\nand cover much more advanced usage of Make than is in this presentation.\n\n---\n# Generic Targets\n\nIt\'s possible to tell Make how to satisfy a kind of target, based on\nsome simple pattern matching.\n\n```\nOBJECTS := myfile.txt someotherfile.txt thirdfile.txt\n\n%.txt: %.src\n  @echo \'building $*\'\n  cp $< $@\n\nall: $(OBJECTS)\n\n.PHONY: all\n```\n\nIn this example, the `all` target is satisfied by three `.txt` files.\nMake will use the declared `.txt to .src` generic target satisfy `all`,\nand will look for the same files with the `.src` suffix to do so.\n\n---\n# Text Replacement\n\nMake has some basic text-replacement features for variables.  These are\nmost often used to help generate lists of dependencies based on a \nset of source files and their extensions.\n\n```\nSOURCES := myfile.src someotherfile.src thirdfile.src\nOBJECTS := $(SOURCES:.src=.txt)\n```\n\nThe above assigns a list of `.txt` files to `OBJECTS`, by replacing all \nthe `.src` extensions with `.txt`.\n\n???\nThe above approach is used most often with C++ projects, due to the\nreliable coupling of sources (.c, .cc, .cpp, or .cxx files) and the \ncompiler\'s object file extension (usually .o, or .obj).\n\nNote that the use of generic targets along with this feature do nothing\nat all to the filename or file\'s path.  It\'s this property that \nreveals Make as a tool peferring a flat file structure.  If it is not\ndesirable for intermediate files (like object files) to be added to\nthe same directory as the source files, One must resort to much more\ntext manipulation to avoid it.\n\n---\n# Built-in Functions\n\nMake provides some powerful built-in processing capabilities in order\nto further slim down your typical Makefile.\n\n```\n# use \'find\' to dynamically find all the source files\nSOURCES := $(shell find . -name \'*.c\' -or -name \'*.js\')\n\n# wildcard is more portable than \'find\'\nFILES := $(wildcard spec/*.coffee)\n\n# get the directory of one or more filenames (/foo/bar/ / /home/foo/)\nDIRS := $(dirname /foo/bar/baz.c /gorf.c /home/foo/x.c)\n\n# filter out text\nJS_SOURCES := $(filter %.js, $(SOURCES))\n```\n\nhttps://www.gnu.org/software/make/manual/html_node/Functions.html\n---\n# Extras\n\n```\n# Make will emit every command\'s text to the console - \'@\' prevents that.\nhello:\n  @echo \'hello world\'\n\n# Additional Makefile code can be pulled in using `include`\ninclude common.in\n\n# Set the preferred shell\nSHELL := git bash\n\n# Make has a conditional syntax (usually used for OS detection)\nifeq ($(OS),Windows_NT)\n  OS := \'windows\'\nelse\n  OS := \'bsd/linux\'\nendif\n```\n\n???\nThe `include` directive is seldom seen outside of automake/autoconf \nsetups.  Considering that its possible to use `include` for libraries\nof generic make rules, its rather underrated.  For instance, a \ndeveloper could put all the generic build capabilities into a common\ninclude file, and place the project specific targets and file\nlists in the main Makefile.\n\nWhile it\'s possible to change the shell using `SHELL`, that doesn\'t\nmean that you\'ve arrived at an easy hack for Windows portability. \nYou still have to avoid unix/linux specific commands like `find`, and\nstick to whatever functions Make provides instead.\n\n---\n# Javascript\n\nAn example of CoffeeScript compilation (\"transpiling\") using Make. \n\n```\nPATH  := node_modules/.bin:$(PATH)\nSHELL := /bin/bash\n\ntemplate_source := templates/*.handlebars\ntemplate_js     := build/templates.js\n\n$(template_js): $(templates_source)\n  mkdir -p $(dir $@)\n  handlebars $(templates_source) > $@\n\nsource_files := $(wildcard lib/*.coffee)\nbuild_files  := $(source_files:%.coffee=build/%.js)\n\nspec_coffee  := $(wildcard spec/*.coffee)\nspec_js      := $(spec_coffee:%.coffee=build/%.js)\n\nbuild/%.js: %.coffee\n  coffee -co $(dir $@) $<\n```\n\n???\nHere we have an example of compiling CoffeeScript files using some\nvery generic rules.  \n\nWhile your particular stack may not use Handlebars or CoffeeScript,\nthere\'s no reason why this can\'t be adapted to, say, AngularJS and \nTypeScript.\n\n---\n# Javascript Continued\n\nAn example of how one might package an application\'s frontend Javascript \nresources files, using uglifyjs.\n\n```\napp_bundle := build/app.js\n\nlibraries  := vendor/jquery.js \\\n  node_modules/handlebars/dist/handlebars.runtime.js \\\n  node_modules/underscore/underscore.js \\\n  node_modules/backbone/backbone.js\n\n$(app_bundle): $(libraries) $(build_files) $(template_js)\n  uglifyjs -cmo $@ $^\n\n%.css: %.less\n  lessc $? > $@\n\nlint: $(libraries) $(build_files) $(template_js)\n  jshint $?\n\nall: $(app_bundle)\n```\nAn example of what most of us tend to put into our Gruntfiles right away. \n\nEven with the explicit `libraries` listing, this is fewer lines of code\ncompared to a Gruntfile of the same capability.\n\n---\n# Watch\n\nSince Make is basically for command line automation, a Grunt-style \'watch\' \ntarget can be configured by using a command like `watchman`.\n\n```\nwatch:\n    watchman watch $(shell pwd)\n    watchman -- trigger $(shell pwd) remake *.js *.css -- make all\n```\n\n???\nOf course we want the equivalent of `grunt watch`.  Since that\'s out of\nscope for a tool like Make, we\'ll need an external command that does the \njob instead.  A phony `watch` target backed on Facebook\'s `watchman` \nmakes this possible.\n\n---\n# Thank you\n\nThanks for viewing this presentation.\n\n---\n#Additional Reading\n\nAbout Make:\n* https://en.wikipedia.org/wiki/Make_(software)\n* https://en.wikipedia.org/wiki/Makefile\n\nTutorials and Blog Posts About Make:\n* http://www.puxan.com/web/blog/HowTo-Write-Simple-Makefiles\n* http://mrbook.org/blog/tutorials/make/\n* http://www.puxan.com/web/blog/HowTo-Write-Generic-Makefiles\n* https://stackoverflow.com/questions/714100/os-detecting-makefile\n* https://blog.jcoglan.com/2014/02/05/building-javascript-projects-with-make/\n* https://algorithms.rdio.com/post/make/\n* https://stackoverflow.com/questions/448910/makefile-variable-assignment\n\nReference:\n* https://www.gnu.org/software/make/manual/html_node/Automatic-Variables.html\n* https://www.gnu.org/software/make/manual/html_node/Functions.html\n";
+      var backup = $('<div/>');
+      var is_showing = false;
+
+      $('button.slideshow').click(function() {
+        console.log(arguments);
+        $('body').contents().appendTo(backup);
+        var slideshow = remark.create({
+          source: markdown
+        });
+        is_showing = true;
+      });
+
+      $(document).keyup(function(e){
+        if(e.which == 27 && is_showing) {
+          var body = $('body');
+          body.html('');
+          body.removeClass('remark-container');
+          backup.contents().appendTo(body);
+          is_showing = false;
+        }
+      });
+    });
+  </script>
+
+  <header class="post-header">
+    <h1 class="post-title">A Guide to Make</h1>
+  </header>
+
+  <div class="post-content">
+    <p>Eric Anderton - (c) 2016 - Version 1.0</p>
+
+<p>This presentation is a tour of the main features and use of <code>Make</code>, 
+the dependency management tool.</p>
+
+    <button class="slideshow">Start Presentation</button>
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Phase Positive</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>Phase Positive</li>
+          <li><a href="mailto:eric.t.anderton@gmail.com">eric.t.anderton@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/eanderton"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">eanderton</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Blog and training materials.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

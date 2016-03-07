@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Phase Positive</title>
+    <description>Blog and training materials.
+</description>
+    <link>http://eanderton.github.io/</link>
+    <atom:link href="http://eanderton.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Sun, 06 Mar 2016 21:45:33 -0500</pubDate>
+    <lastBuildDate>Sun, 06 Mar 2016 21:45:33 -0500</lastBuildDate>
+    <generator>Jekyll v3.1.1</generator>
+    
+      <item>
+        <title>Testing in Flask</title>
+        <description>&lt;p&gt;Something that proved harder than it needed to be.&lt;/p&gt;
+
+&lt;h2&gt;The Problem&lt;/h2&gt;
+
+&lt;p&gt;Recently, I undertook a task to investigate how to write robust
+unit-tests in Flask.  Specifically, how to interact with the
+current &lt;code&gt;test_client()&lt;/code&gt; session, and verify its contents.&lt;/p&gt;
+
+&lt;p&gt;On the surface, it would appear that the
+documentation that surrounds how to write tests is pretty 
+self-evident: just copy/paste the examples and let things flow
+from there. And this works... &lt;em&gt;most&lt;/em&gt; of the time.&lt;/p&gt;
+
+&lt;p&gt;Despite my best efforts I found myself coming back to the same 
+stumbling blocks over, and over.  Every time I deviated from 
+the script in the documentation, I wound up with questions I 
+could not answer.  Something had all but disarmed my best 
+Google-fu.  Then I figured out why.&lt;/p&gt;
+
+&lt;p&gt;First, Flask documentation, while providing a nice narrative, manages
+to obscure API pages at every turn.  Inexplicably, they have poor
+page ranking &lt;em&gt;and&lt;/em&gt; are not always linked on Flask doc pages.&lt;/p&gt;
+
+&lt;p&gt;Second, many classes either use some kind of runtime injection, or like
+the werkzeug &lt;code&gt;FileUpload&lt;/code&gt; class, proxy function calls from &lt;code&gt;__getattr__&lt;/code&gt;
+to some member value set during &lt;code&gt;__init__&lt;/code&gt;. Other times, classes
+are added to the namespace at runtime, further hampering &lt;code&gt;pydoc&lt;/code&gt;.
+So when you finally find the API documentation for a given class,
+it may prove useless anyway.&lt;/p&gt;
+
+&lt;p&gt;Combined, both of these points foil most attempts to simply look
+up the behavior of a given class/type either online or via &lt;code&gt;pydoc&lt;/code&gt;.
+Neither of these can possibly give the full picture.  You&amp;#39;re left
+to either introspect things at runtime, or dig around in the source.&lt;/p&gt;
+
+&lt;h2&gt;What to Look For&lt;/h2&gt;
+
+&lt;p&gt;First up: when the docs fail you, find salient examples.  Here&amp;#39;s a
+decent candidate for Unit-testing:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/mitsuhiko/flask/blob/master/examples/minitwit/test_minitwit.py&quot;&gt;https://github.com/mitsuhiko/flask/blob/master/examples/minitwit/test_minitwit.py&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Now my personal preference is for &lt;code&gt;Flask.ext.testing&lt;/code&gt; which exposes
+a Flask specific &lt;code&gt;UnitTest&lt;/code&gt; class for building test suites.  This 
+makes for richer tests thanks to all the assertion functions it provides.&lt;/p&gt;
+
+&lt;p&gt;Then there&amp;#39;s this gem:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions&quot;&gt;http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;With many things Flask, the way forward takes advantage of a 
+lot of magic, injection, and hidden behavior.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;test_client&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;rv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;/&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;assert&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;flask&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;session&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;foo&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;42&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;What&amp;#39;s happening here is that as long as the test_client is in
+scope, &lt;code&gt;flask.session&lt;/code&gt; gives us whatever session is tied to the
+current client &lt;em&gt;on the server side&lt;/em&gt;.  When verifying the behavior 
+of something like a login URL, this is how we ensure that there
+really is a session.&lt;/p&gt;
+
+&lt;p&gt;Then there&amp;#39;s this piece:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;test_client&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;session_transaction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;sess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;a_key&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;a value&#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The second &lt;code&gt;with&lt;/code&gt; statement here starts a transaction to modify 
+the current session &lt;em&gt;ahead&lt;/em&gt; of any HTTP activity.  Once the scope 
+is closed, the changes are committed to the session.  Strange,
+but that&amp;#39;s how the Flask folks set this up.&lt;/p&gt;
+
+&lt;h2&gt;Next Steps&lt;/h2&gt;
+
+&lt;p&gt;From here it&amp;#39;s a matter of experimentation.  The test_client()
+is clearly the only game in town, and the examples suggest that
+all the typical HTTP verbs are exposed as functions (e.g.
+&lt;code&gt;get()&lt;/code&gt;, &lt;code&gt;post()&lt;/code&gt; etc.).  To this author&amp;#39;s recollection, there&amp;#39;s
+no good documentation for this in the API.  Maybe the more 
+obscure verbs are exposed, but who knows?&lt;/p&gt;
+
+&lt;p&gt;As the rant above explains, it&amp;#39;s not always easy to determine 
+what types one is
+coding against by just scanning the documentation.  Instead,
+runtime introspection (read: logging and interactive debugging)
+is crucial to figuring out what is actually going on.&lt;/p&gt;
+</description>
+        <pubDate>Sun, 06 Mar 2016 00:00:00 -0500</pubDate>
+        <link>http://eanderton.github.io/2016/03/06/testing-in-flask.html</link>
+        <guid isPermaLink="true">http://eanderton.github.io/2016/03/06/testing-in-flask.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Make Trainer Online</title>
+        <description>&lt;p&gt;As the title suggests, the Make training materials are now online.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;/training/a-guide-to-make&quot;&gt;A Guide to Make&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The landing page is actually a cover page for a much more elaborate
+slide presentation, complete with notes.  Remark.js made this a very
+easy lift, as it uses Markdown in much the same style as this Jekyll 
+generated site.&lt;/p&gt;
+</description>
+        <pubDate>Sun, 06 Mar 2016 00:00:00 -0500</pubDate>
+        <link>http://eanderton.github.io/2016/03/06/make-trainer-online.html</link>
+        <guid isPermaLink="true">http://eanderton.github.io/2016/03/06/make-trainer-online.html</guid>
+        
+        
+      </item>
+    
+  </channel>
+</rss>

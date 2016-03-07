@@ -1,0 +1,20 @@
+<html>
+  <head>
+    <script src="/showdown.min.js"></script>
+    <script src="/jquery.min.js"></script>
+    <link rel="styleheet" href="/style.css">
+    <title></title>
+    <script>
+      $(document).ready(function() {
+        $.get('index.md').success(function (data) {
+          // load markdown and populate page
+          var converter = new showdown.Converter();
+          $('body').html(converter.makeHtml(data));
+          // set page title from leading content title (if present)
+          $('title').text($('h1').first().text());
+        });
+      });
+    </script>
+  </head>
+  <body></body>
+</html>
